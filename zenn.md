@@ -49,7 +49,7 @@ ImportError: libcublas.so.11: cannot open shared object file: No such file or di
 >>> 
 ```
 単純に`libcublas.so`がないらしいです。そんなわけあるかと思い`Synaptic`を起動してみたところ・・  
-![](img/shadow_Synapticパッケージマネージャ_b-fs8.png)  
+![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_Synapticパッケージマネージャ_b-fs8.png)  
 CUDA関連のライブラリがごっそり消えている？  
 # ログを確認する
 `/var/log/apt/history.log`の中の`libcublas`を確認すると以下の様になってました。  
@@ -100,7 +100,7 @@ Remove: cuda-drivers:amd64 (470.57.02-1), cuda-runtime-11-4:amd64 (11.4.2-1), cu
 End-Date: 2021-12-17  09:43:39
 ```
 疑問点は残りましたがいつ誰がやらかしたのかが分かりました。  
-![](img/shadow_img.png)
+![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_img.png)
 # 再インストール
 ## 環境
 ```bash
@@ -113,7 +113,7 @@ Codename:	bionic
 ```
 ## 方法
 やり方は複数あるのですが簡単にメモします。  
-https://developer.nvidia.com/cuda-downloads
+https://developer.nvidia.com/cuda-downloads  
 上記URLでOS等を選びます。Ubuntu18.04のネットワークインストールだとリポジトリの登録が以下の様に指示されます。  
 ```
 $ wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pinsudo 
@@ -126,12 +126,12 @@ $ sudo apt-get -y install cuda
 今回のように誤ってライブラリを消してしまった場合はリポジトリまで消えてません。  
 Driverのバージョンは以下のURLから確認できます。  
 https://www.nvidia.co.jp/Download/index.aspx?lang=jp#  
-![](img/shadow_driver_download.png)  
-![](img/shadow_driver_version.png)  
+![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_driver_download.png)  
+![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_driver_version.png)  
 バージョンは`470.94`のようです。`追加情報`に「ここからダウンロードするのではなくディストリビューションごとのパッケージマネージャーからインストールしてね」とかかれています。  
 `toolkit driver version`は以下URLの`table 3`にあります。  
 https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html  
-![](img/shadow_toolkit_driver_version.png)  
+![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_toolkit_driver_version.png)  
 今回パッケージマネージャーから選んだところ、`cuda-drivers-495 (バージョン 495.29.05-1) がインストールされます`とでました。  
 
 ```bash
