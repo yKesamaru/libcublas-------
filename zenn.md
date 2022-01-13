@@ -28,8 +28,11 @@ ImportError: libcublas.so.11: cannot open shared object file: No such file or di
 単純に`libcublas.so`がないらしいです。そんなわけあるかと思い`Synaptic`を起動してみたところ・・  
 ![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_Synapticパッケージマネージャ_b-fs8.png)  
 CUDA関連のライブラリがごっそり消えている？  
+こればいつ誰がやらかしたのか調べる必要がありそうです。。  
 # ログを確認する
-`/var/log/apt/history.log`の中の`libcublas`を確認すると以下の様になってました。  
+インストール系統の話なので見るべきLogはあまり多くありません。  
+## `/var/log/apt/history.log`
+`/var/log/apt/history.log`の中の`libcublas`を調べます。以下の様になってました。  
 ```bash
 Start-Date: 2022-01-03  06:44:31
 Commandline: apt autoremove
@@ -37,12 +40,14 @@ Requested-By: {user} (1000)
 Remove: libnpp-dev-11-4:amd64 (11.4.0.110-1), cuda-nsight-compute-11-4:amd64 (11.4.3-1), cuda-nvprof-11-4:amd64 (11.4.120-1), libcusparse-dev-11-4:amd64 (11.6.0.120-1), cuda-toolkit-11-config-common:amd64 (11.5.117-1), cuda-nvprune-11-4:amd64 (11.4.120-1), cuda-gdb-11-4:amd64 (11.4.120-1), cuda-visual-tools-11-4:amd64 (11.4.3-1), cuda-cupti-11-4:amd64 (11.4.120-1), cuda-libraries-dev-11-4:amd64 (11.4.3-1), cuda-nvrtc-dev-11-4:amd64 (11.4.152-1), cuda-cccl-11-4:amd64 (11.4.122-1), cuda-cupti-dev-11-4:amd64 (11.4.120-1), cuda-libraries-11-4:amd64 (11.4.3-1), liburcu6:amd64 (0.10.1-1ubuntu1), cuda-sanitizer-11-4:amd64 (11.4.120-1), cuda-nvrtc-11-4:amd64 (11.4.152-1), cuda-nsight-systems-11-4:amd64 (11.4.3-1), libcublas-11-4:amd64 (11.6.5.2-1), libcusolver-dev-11-4:amd64 (11.2.0.120-1), cuda-tools-11-4:amd64 (11.4.3-1), cuda-nvtx-11-4:amd64 (11.4.120-1), libnpp-11-4:amd64 (11.4.0.110-1), libcufile-11-4:amd64 (1.0.2.10-1), cuda-cudart-11-4:amd64 (11.4.148-1), cuda-nvdisasm-11-4:amd64 (11.4.152-1), cuda-samples-11-4:amd64 (11.4.120-1), cuda-documentation-11-4:amd64 (11.4.126-1), cuda-nvcc-11-4:amd64 (11.4.152-1), cuda-nvvp-11-4:amd64 (11.4.120-1), cuda-cuxxfilt-11-4:amd64 (11.4.120-1), libcurand-11-4:amd64 (10.2.5.120-1), cuda-toolkit-11-4:amd64 (11.4.3-1), nsight-compute-2021.2.2:amd64 (2021.2.2.1-1), cuda-cudart-dev-11-4:amd64 (11.4.148-1), cuda-nvml-dev-11-4:amd64 (11.4.120-1), libcufile-dev-11-4:amd64 (1.0.2.10-1), libcublas-dev-11-4:amd64 (11.6.5.2-1), nsight-systems-2021.3.2:amd64 (2021.3.2.4-027534f), libcurand-dev-11-4:amd64 (10.2.5.120-1), libcusolver-11-4:amd64 (11.2.0.120-1), cuda-compiler-11-4:amd64 (11.4.3-1), libcufft-dev-11-4:amd64 (10.5.2.100-1), linux-hwe-5.4-headers-5.4.0-89:amd64 (5.4.0-89.100~18.04.1), libcusparse-11-4:amd64 (11.6.0.120-1), cuda-nsight-11-4:amd64 (11.4.120-1), cuda-command-line-tools-11-4:amd64 (11.4.3-1), cuda-driver-dev-11-4:amd64 (11.4.148-1), cuda-toolkit-11-4-config-common:amd64 (11.4.148-1), cuda-memcheck-11-4:amd64 (11.4.120-1), libnvjpeg-11-4:amd64 (11.5.2.120-1), cuda-toolkit-config-common:amd64 (11.5.117-1), libnvjpeg-dev-11-4:amd64 (11.5.2.120-1), libcufft-11-4:amd64 (10.5.2.100-1), cuda-cuobjdump-11-4:amd64 (11.4.120-1), gds-tools-11-4:amd64 (1.0.2.10-1)
 End-Date: 2022-01-03  06:44:38  
 ```
-1/3にコマンドラインから`apt autoremove`したようです。全く覚えてません。そこで`/var/log/`からその時の状況を追ってみます。  
+1/3にコマンドラインから`apt autoremove`してあります。自分は全く覚えてません。  
+そこで`/var/log/`からその時の状況を追ってみます。 
+## /var/log/kern.log.2 
 ```bash:/var/log/kern.log.2.gz
 Jan  3 06:32:12 {user} kernel: [    0.000000] Linux version 5.4.0-91-generic (buildd@lgw01-amd64-024) (gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)) #102~18.04.1-Ubuntu SMP Thu Nov 11 14:46:36 UTC 2021 (Ubuntu 5.4.0-91.102~18.04.1-generic 5.4.151)
-
 ```
-お正月3日目、午前6時32分にPCの電源を入れたようです。  
+犯人はお正月3日目、午前6時32分にPCの電源を入れたようです。朝早いですね。  
+## `unattended-upgrades.log`自動アップデートも見てみてみる
 ```bash:/var/log/unattended-upgrades/unattended-upgrades.log
 2022-01-03 06:32:22,203 INFO 初期状態でブラックリストにあるパッケージ: 
 2022-01-03 06:32:22,204 INFO 初期状態でホワイトリストにあるパッケージ: 
@@ -54,7 +59,9 @@ Jan  3 06:32:12 {user} kernel: [    0.000000] Linux version 5.4.0-91-generic (bu
 2022-01-03 06:32:27,751 INFO 許可されているパッケージ導入元: o=Ubuntu,a=bionic, o=Ubuntu,a=bionic-security, o=UbuntuESMApps,a=bionic-apps-security, o=UbuntuESM,a=bionic-infra-security
 2022-01-03 06:32:30,869 INFO 自動更新可能なパッケージおよび保留中の自動削除が見つかりません
 ```
-起動してから自動アップデートが走っています。  
+起動してから自動アップデートが走っています。特におかしいところはないように見えます。
+##  /var/log/auth.log1
+認証関係はこのログで見ることが出来ます。誰かがコマンドラインから操作したに違いない。    
 そして問題行動が以下。  
 ```bash:/var/log/auth.log.1
 Jan  3 06:43:56 {user} sudo:    {user} : TTY=pts/0 ; PWD=/home/{user} ; USER=root ; COMMAND=/usr/bin/apt update
@@ -65,9 +72,9 @@ Jan  3 06:44:07 {user} sudo: pam_unix(sudo:session): session opened for user roo
 Jan  3 06:44:08 {user} sudo: pam_unix(sudo:session): session closed for user root
 Jan  3 06:44:28 {user} sudo:    {user} : TTY=pts/0 ; PWD=/home/{user} ; USER=root ; COMMAND=/usr/bin/apt autoremove
 ```
-仮想端末から`apt update; apt upgrade; apt autoremove;`を行っていたようです。  
+仮想端末から`apt update; apt upgrade; apt autoremove;`を行っていた事が分かりました。`{user}と書いてある所は**自分**です・・。お正月で酔っ払ってこんなことをしたんでしょうかね。お酒はのみませんでしたけど。    
     
-どうして`autoremove`の候補に上がってきたのか原因がよく分かりません。。過去に遡って12月17日に`cuda-drivers:amd64 (470.57.02-1), cuda-runtime-11-4:amd64 (11.4.2-1), cuda-demo-suite-11-4:amd64 (11.4.100-1), cuda-11-4:amd64 (11.4.2-1)`が削除されているようです。これが関係しているのかな？よく分かりません。  
+どうして`autoremove`の候補にCUDA関連ライブラリが上がってきたのか原因がよく分かりません。過去に遡って12月17日に`cuda-drivers:amd64 (470.57.02-1), cuda-runtime-11-4:amd64 (11.4.2-1), cuda-demo-suite-11-4:amd64 (11.4.100-1), cuda-11-4:amd64 (11.4.2-1)`が削除されているようです。新規で別のものを上書きしてましたけど。これが関係しているのかな？よく分かりません。  
 
 ```bash:/var/log/apt/history.log.1
 Start-Date: 2021-12-17  09:40:56
@@ -76,8 +83,10 @@ Upgrade: nvidia-docker2:amd64 (2.7.0-1, 2.8.0-1), containerd.io:amd64 (1.4.11-1,
 Remove: cuda-drivers:amd64 (470.57.02-1), cuda-runtime-11-4:amd64 (11.4.2-1), cuda-demo-suite-11-4:amd64 (11.4.100-1), cuda-11-4:amd64 (11.4.2-1)
 End-Date: 2021-12-17  09:43:39
 ```
-疑問点は残りましたがいつ誰がやらかしたのかが分かりました。  
-![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_img.png)
+疑問点は残りました。autoremoveの候補に上がってきても今度からは消しません。  
+しかし犯人がいつどのようにやらかしたのかは分かりました。  
+![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_img.png)  
+本当にすいませんでした。
 # 再インストール
 ## 環境
 ```bash
@@ -100,7 +109,7 @@ $ sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cud
 $ sudo apt-get update
 $ sudo apt-get -y install cuda
 ```
-今回のように誤ってライブラリを消してしまった場合はリポジトリまで消えてません。  
+今回のように誤ってライブラリを消してしまった場合はリポジトリまで消えてません。(確認しました)  
 Driverのバージョンは以下のURLから確認できます。  
 https://www.nvidia.co.jp/Download/index.aspx?lang=jp#  
 ![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_driver_download.png)  
@@ -110,7 +119,7 @@ https://www.nvidia.co.jp/Download/index.aspx?lang=jp#
 https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html  
 ![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_toolkit_driver_version.png)  
 今回パッケージマネージャーから選んだところ、`cuda-drivers-495 (バージョン 495.29.05-1) がインストールされます`とでました。  
-
+:::details 再インストールの様子
 ```bash
 cuda-drivers-470 が削除されます
 libnvidia-cfg1-470 が削除されます
@@ -210,9 +219,10 @@ nvidia-kernel-common-495 (バージョン 495.46-0ubuntu0.18.04.1) がインス�
 nvidia-kernel-source-495 (バージョン 495.46-0ubuntu0.18.04.1) がインストールされます
 nvidia-utils-495 (バージョン 495.46-0ubuntu0.18.04.1) がインストールされます
 xserver-xorg-video-nvidia-495 (バージョン 495.46-0ubuntu0.18.04.1) がインストールされます
-```
+```  
+:::  
 再インストール後、再起動して`nvidia-smi`で確認を行います。再起動しない場合はエラーになります。  
-```bash
+```bash: エラー
 $ nvidia-smi
 Failed to initialize NVML: Driver/library version mismatch
 ```
@@ -228,4 +238,4 @@ True
 >>> 
 ```
 直りました。
-
+他にもこの時期に同じ症状が出た方はいたんでしょうか。
