@@ -1,35 +1,12 @@
 # CUDA関連ライブラリがごそっと消えた
 `dlib`を使ったPythonプログラムの起動に失敗しました。  
-`ImportError: libcublas.so.11: cannot open shared object file: No such file or directory`  
-何日か前まで起こらなかったエラーです。  
+```bash:エラー
+`ImportError: libcublas.so.11: cannot open shared object file: No such file or directory
+```  
+前まで起こらなかったエラーです。  
 `nvidia-smi`を確認した様子が以下。  
-```bash
-$ nvidia-smi
-Wed Jan 12 22:33:53 2022       
-+-----------------------------------------------------------------------------+
-| NVIDIA-SMI 470.86       Driver Version: 470.86       CUDA Version: 11.4     |
-|-------------------------------+----------------------+----------------------+
-| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
-|                               |                      |               MIG M. |
-|===============================+======================+======================|
-|   0  NVIDIA GeForce ...  Off  | 00000000:08:00.0  On |                  N/A |
-| 41%   29C    P8    15W / 120W |    340MiB /  5941MiB |      1%      Default |
-|                               |                      |                  N/A |
-+-------------------------------+----------------------+----------------------+
-                                                                               
-+-----------------------------------------------------------------------------+
-| Processes:                                                                  |
-|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
-|        ID   ID                                                   Usage      |
-|=============================================================================|
-|    0   N/A  N/A      1240      G   /usr/lib/xorg/Xorg                165MiB |
-|    0   N/A  N/A      2160      G   /usr/lib/firefox/firefox          149MiB |
-|    0   N/A  N/A      3121      G   ...AAAAAAAAA= --shared-files       19MiB |
-|    0   N/A  N/A      4553      G   /usr/lib/firefox/firefox            1MiB |
-+-----------------------------------------------------------------------------+
+![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_470.png)  
 
-```
 正常なようです。DriverやCUDAバージョンも変わりないように見えます。    
 Pythonインタラクティブモードで`dlib`が正常に呼び出せるか確認してみました。  
 ```bash
@@ -239,30 +216,8 @@ xserver-xorg-video-nvidia-495 (バージョン 495.46-0ubuntu0.18.04.1) がイ�
 $ nvidia-smi
 Failed to initialize NVML: Driver/library version mismatch
 ```
+![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_495.png)  
 ```bash:再起動後
-$ nvidia-smi
-Thu Jan 13 07:26:56 2022       
-+-----------------------------------------------------------------------------+
-| NVIDIA-SMI 495.46       Driver Version: 495.46       CUDA Version: 11.5     |
-|-------------------------------+----------------------+----------------------+
-| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
-|                               |                      |               MIG M. |
-|===============================+======================+======================|
-|   0  NVIDIA GeForce ...  Off  | 00000000:08:00.0  On |                  N/A |
-| 41%   29C    P8    15W / 120W |    235MiB /  5941MiB |      1%      Default |
-|                               |                      |                  N/A |
-+-------------------------------+----------------------+----------------------+
-                                                                               
-+-----------------------------------------------------------------------------+
-| Processes:                                                                  |
-|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
-|        ID   ID                                                   Usage      |
-|=============================================================================|
-|    0   N/A  N/A      1276      G   /usr/lib/xorg/Xorg                121MiB |
-|    0   N/A  N/A      2092      G   /usr/lib/firefox/firefox          111MiB |
-+-----------------------------------------------------------------------------+
-
 $ python
 Python 3.7.11 (default, Nov  3 2021, 08:07:41) 
 [GCC 7.5.0] on linux
