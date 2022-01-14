@@ -47,7 +47,7 @@ End-Date: 2022-01-03  06:44:38
 ```
 1/3にコマンドラインから`apt autoremove`してあります。自分は全く覚えてません。  
 そこで`/var/log/`からその時の状況を追ってみます。 
-## /var/log/kern.log.2 
+## `/var/log/kern.log.2` 
 ```bash:/var/log/kern.log.2.gz
 Jan  3 06:32:12 {user} kernel: [    0.000000] Linux version 5.4.0-91-generic (buildd@lgw01-amd64-024) (gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)) #102~18.04.1-Ubuntu SMP Thu Nov 11 14:46:36 UTC 2021 (Ubuntu 5.4.0-91.102~18.04.1-generic 5.4.151)
 ```
@@ -64,8 +64,8 @@ Jan  3 06:32:12 {user} kernel: [    0.000000] Linux version 5.4.0-91-generic (bu
 2022-01-03 06:32:27,751 INFO 許可されているパッケージ導入元: o=Ubuntu,a=bionic, o=Ubuntu,a=bionic-security, o=UbuntuESMApps,a=bionic-apps-security, o=UbuntuESM,a=bionic-infra-security
 2022-01-03 06:32:30,869 INFO 自動更新可能なパッケージおよび保留中の自動削除が見つかりません
 ```
-起動してから自動アップデートが走っています。特におかしいところはないように見えます。
-##  /var/log/auth.log1
+起動してから自動アップデートが走っています。`2022-01-03 06:32:30,869 INFO 自動更新可能なパッケージおよび保留中の自動削除が見つかりません`とのこと。
+##  `/var/log/auth.log1`
 認証関係はこのログで見ることが出来ます。誰かがコマンドラインから操作したに違いない。    
 そして問題行動が以下。  
 ```bash:/var/log/auth.log.1
@@ -77,7 +77,7 @@ Jan  3 06:44:07 {user} sudo: pam_unix(sudo:session): session opened for user roo
 Jan  3 06:44:08 {user} sudo: pam_unix(sudo:session): session closed for user root
 Jan  3 06:44:28 {user} sudo:    {user} : TTY=pts/0 ; PWD=/home/{user} ; USER=root ; COMMAND=/usr/bin/apt autoremove
 ```
-仮想端末から`apt update; apt upgrade; apt autoremove;`を行っていた事が分かりました。`{user}と書いてある所は**自分**です・・。お正月で酔っ払ってこんなことをしたんでしょうかね。お酒はのみませんでしたけど。    
+仮想端末から`apt update; apt upgrade; apt autoremove;`を行っていた事が分かりました。`{user}`と書いてある所は**自分**です・・。お正月で酔っ払ってこんなことをしたんでしょうかね。お酒はのみませんでしたけど。    
     
 どうして`autoremove`の候補にCUDA関連ライブラリが上がってきたのか原因がよく分かりません。過去に遡って12月17日に`cuda-drivers:amd64 (470.57.02-1), cuda-runtime-11-4:amd64 (11.4.2-1), cuda-demo-suite-11-4:amd64 (11.4.100-1), cuda-11-4:amd64 (11.4.2-1)`が削除されているようです。新規で別のものを上書きしてましたけど。これが関係しているのかな？よく分かりません。  
 
@@ -102,7 +102,7 @@ Release:	18.04
 Codename:	bionic
 ```
 ## 方法
-やり方は複数あるのですが簡単にメモします。  
+やり方は複数あるのですが一例^[ubuntu-drivers devices; ubuntu-drivers autoinstallでもドライバは可]をメモします。  
 https://developer.nvidia.com/cuda-downloads  
 上記URLでOS等を選びます。Ubuntu18.04のネットワークインストールだとリポジトリの登録が以下の様に指示されます。  
 ```
@@ -122,7 +122,8 @@ https://www.nvidia.co.jp/Download/index.aspx?lang=jp#
 `toolkit driver version`は以下URLの`table 3`にあります。  
 https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html  
 ![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_toolkit_driver_version.png)  
-今回パッケージマネージャーから選んだところ、`cuda-drivers-495 (バージョン 495.29.05-1) がインストールされます`とでました。  
+今回パッケージマネージャーから選んだところ、`cuda-drivers-495 (バージョン 495.29.05-1) がインストールされます`とでました。ドライバのバージョン縛りがないのでこのまま進めましたが縛りがある場合は以下を参照。  
+https://qiita.com/yukoba/items/4733e8602fa4acabcc35  
 :::details 再インストールの様子
 ```bash
 cuda-drivers-470 が削除されます
@@ -231,6 +232,7 @@ $ nvidia-smi
 Failed to initialize NVML: Driver/library version mismatch
 ```
 ![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_495.png)  
+*再起動後*
 ```bash:再起動後
 $ python
 Python 3.7.11 (default, Nov  3 2021, 08:07:41) 
@@ -243,4 +245,3 @@ True
 ```
 直りました。
 他にもこの時期に同じ症状が出た方はいたんでしょうか。  
-logをみてたら怪しいところ沢山あったので調べてみます。
