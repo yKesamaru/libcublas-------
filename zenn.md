@@ -3,7 +3,7 @@
 ```bash:エラー
 `ImportError: libcublas.so.11: cannot open shared object file: No such file or directory
 ```  
-前まで起こらなかったエラーです。  
+今まで起こらなかったエラーです。  
 `nvidia-smi`を確認した様子が以下。  
 ![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_470.png)  
 
@@ -26,11 +26,16 @@ ImportError: libcublas.so.11: cannot open shared object file: No such file or di
 >>> 
 ```
 単純に`libcublas.so`がないらしいです。そんなわけあるかと思い`Synaptic`を起動してみたところ・・  
-![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_Synapticパッケージマネージャ_b-fs8.png)  
 CUDA関連のライブラリがごっそり消えている？  
-こればいつ誰がやらかしたのか調べる必要がありそうです。。  
 # ログを確認する
 インストール系統の話なので見るべきLogはあまり多くありません。  
+- /var/log/
+  - kern.log
+  - auth.log
+  - unattended-upgrades.log
+  - apt/
+    - history.log
+    - term.log
 ## `/var/log/apt/history.log`
 `/var/log/apt/history.log`の中の`libcublas`を調べます。以下の様になってました。  
 ```bash
@@ -85,7 +90,6 @@ End-Date: 2021-12-17  09:43:39
 ```
 疑問点は残りました。autoremoveの候補に上がってきても今度からは消しません。  
 しかし犯人がいつどのようにやらかしたのかは分かりました。  
-![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_img.png)  
 本当にすいませんでした。
 # 再インストール
 ## 環境
@@ -238,4 +242,5 @@ True
 >>> 
 ```
 直りました。
-他にもこの時期に同じ症状が出た方はいたんでしょうか。
+他にもこの時期に同じ症状が出た方はいたんでしょうか。  
+logをみてたら怪しいところ沢山あったので調べてみます。
