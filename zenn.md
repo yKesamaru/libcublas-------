@@ -1,4 +1,5 @@
-# CUDA関連ライブラリがごそっと消えた
+`apt autoremove`する時は気をつけましょうという話。
+# cublas等がごそっと消えた
 `dlib`を使ったPythonプログラムの起動に失敗しました。  
 ```bash:エラー
 `ImportError: libcublas.so.11: cannot open shared object file: No such file or directory
@@ -28,7 +29,7 @@ ImportError: libcublas.so.11: cannot open shared object file: No such file or di
 単純に`libcublas.so`がないらしいです。そんなわけあるかと思い`Synaptic`を起動してみたところ・・  
 CUDA関連のライブラリがごっそり消えている？  
 # ログを確認する
-インストール系統の話なので見るべきLogはあまり多くありません。  
+どうして消えてしまったのか以下のログ内容を確認しました。  
 - /var/log/
   - kern.log
   - auth.log
@@ -51,7 +52,7 @@ End-Date: 2022-01-03  06:44:38
 ```bash:/var/log/kern.log.2.gz
 Jan  3 06:32:12 {user} kernel: [    0.000000] Linux version 5.4.0-91-generic (buildd@lgw01-amd64-024) (gcc version 7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04)) #102~18.04.1-Ubuntu SMP Thu Nov 11 14:46:36 UTC 2021 (Ubuntu 5.4.0-91.102~18.04.1-generic 5.4.151)
 ```
-犯人はお正月3日目、午前6時32分にPCの電源を入れたようです。朝早いですね。  
+お正月3日目、午前6時32分にPCの電源を入れたようです。  
 ## `unattended-upgrades.log`自動アップデートも見てみてみる
 ```bash:/var/log/unattended-upgrades/unattended-upgrades.log
 2022-01-03 06:32:22,203 INFO 初期状態でブラックリストにあるパッケージ: 
@@ -66,8 +67,7 @@ Jan  3 06:32:12 {user} kernel: [    0.000000] Linux version 5.4.0-91-generic (bu
 ```
 起動してから自動アップデートが走っています。`2022-01-03 06:32:30,869 INFO 自動更新可能なパッケージおよび保留中の自動削除が見つかりません`とのこと。
 ##  `/var/log/auth.log1`
-認証関係はこのログで見ることが出来ます。誰かがコマンドラインから操作したに違いない。    
-そして問題行動が以下。  
+認証関係はこのログで見ることが出来ます。見つかった問題行動が以下。  
 ```bash:/var/log/auth.log.1
 Jan  3 06:43:56 {user} sudo:    {user} : TTY=pts/0 ; PWD=/home/{user} ; USER=root ; COMMAND=/usr/bin/apt update
 Jan  3 06:43:56 {user} sudo: pam_unix(sudo:session): session opened for user root by (uid=0)
@@ -77,8 +77,9 @@ Jan  3 06:44:07 {user} sudo: pam_unix(sudo:session): session opened for user roo
 Jan  3 06:44:08 {user} sudo: pam_unix(sudo:session): session closed for user root
 Jan  3 06:44:28 {user} sudo:    {user} : TTY=pts/0 ; PWD=/home/{user} ; USER=root ; COMMAND=/usr/bin/apt autoremove
 ```
-仮想端末から`apt update; apt upgrade; apt autoremove;`を行っていた事が分かりました。`{user}`と書いてある所は**自分**です・・。お正月で酔っ払ってこんなことをしたんでしょうかね。お酒はのみませんでしたけど。    
+仮想端末から`apt update; apt upgrade; apt autoremove;`を行っていた事が分かりました。`{user}`と書いてある所は**自分**です。  
     
+## 疑問
 どうして`autoremove`の候補にCUDA関連ライブラリが上がってきたのか原因がよく分かりません。過去に遡って12月17日に`cuda-drivers:amd64 (470.57.02-1), cuda-runtime-11-4:amd64 (11.4.2-1), cuda-demo-suite-11-4:amd64 (11.4.100-1), cuda-11-4:amd64 (11.4.2-1)`が削除されているようです。新規で別のものを上書きしてましたけど。これが関係しているのかな？よく分かりません。  
 
 ```bash:/var/log/apt/history.log.1
@@ -88,10 +89,9 @@ Upgrade: nvidia-docker2:amd64 (2.7.0-1, 2.8.0-1), containerd.io:amd64 (1.4.11-1,
 Remove: cuda-drivers:amd64 (470.57.02-1), cuda-runtime-11-4:amd64 (11.4.2-1), cuda-demo-suite-11-4:amd64 (11.4.100-1), cuda-11-4:amd64 (11.4.2-1)
 End-Date: 2021-12-17  09:43:39
 ```
-疑問点は残りました。autoremoveの候補に上がってきても今度からは消しません。  
-しかし犯人がいつどのようにやらかしたのかは分かりました。  
-本当にすいませんでした。
-# 再インストール
+autoremoveの候補に上がってきても今度からは消しません。  
+しかしいつどのようにやらかしたのかは分かりました。  
+# cublas再インストール
 ## 環境
 ```bash
 $ lsb_release -a
@@ -102,7 +102,11 @@ Release:	18.04
 Codename:	bionic
 ```
 ## 方法
-やり方は複数あるのですが一例^[ubuntu-drivers devices; ubuntu-drivers autoinstallでもドライバは可]をメモします。  
+やり方は複数あるのですが一例をメモします。  
+### リポジトリ追加
+今回のように誤ってライブラリを消してしまった場合はリポジトリまで消えてません。バージョンを指定したい場合は以下を参照。  
+https://qiita.com/yukoba/items/4733e8602fa4acabcc35  
+以下の様な感じだと最新がインストールされます。  
 https://developer.nvidia.com/cuda-downloads  
 上記URLでOS等を選びます。Ubuntu18.04のネットワークインストールだとリポジトリの登録が以下の様に指示されます。  
 ```
@@ -113,17 +117,12 @@ $ sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cud
 $ sudo apt-get update
 $ sudo apt-get -y install cuda
 ```
-今回のように誤ってライブラリを消してしまった場合はリポジトリまで消えてません。(確認しました)  
-Driverのバージョンは以下のURLから確認できます。  
-https://www.nvidia.co.jp/Download/index.aspx?lang=jp#  
-![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_driver_download.png)  
-![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_driver_version.png)  
-バージョンは`470.94`のようです。`追加情報`に「ここからダウンロードするのではなくディストリビューションごとのパッケージマネージャーからインストールしてね」とかかれています。  
+
 `toolkit driver version`は以下URLの`table 3`にあります。  
 https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html  
 ![](https://raw.githubusercontent.com/yKesamaru/libcublas-reinstall/master/img/shadow_toolkit_driver_version.png)  
-今回パッケージマネージャーから選んだところ、`cuda-drivers-495 (バージョン 495.29.05-1) がインストールされます`とでました。ドライバのバージョン縛りがないのでこのまま進めましたが縛りがある場合は以下を参照。  
-https://qiita.com/yukoba/items/4733e8602fa4acabcc35  
+今回パッケージマネージャーから選んだところドライバーは`cuda-drivers-495 (バージョン 495.29.05-1) がインストールされます`とでました。
+
 :::details 再インストールの様子
 ```bash
 cuda-drivers-470 が削除されます
@@ -244,4 +243,6 @@ True
 >>> 
 ```
 直りました。
+# 今後
 他にもこの時期に同じ症状が出た方はいたんでしょうか。  
+再度`apt autoremove`の候補に出てくるかどうか様子を見たいと思います。
